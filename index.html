@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>चंद्र दर्शन — Lunar Temple</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Noto+Serif+Devanagari:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --void: #000205;
+            --deep: #03080f;
+            --midnight: #060f1e;
+            --navy: #0b1a35;
+
+            --gold: #c8962a;
+            --gold-b: #f2c84a;
+            --gold-p: #ead9a8;
+            --gold-dim: #7a5c1a;
+            --gold-glow: rgba(242, 200, 74, .45);
+
+            --saffron: #e06818;
+            --vermillion: #c22a0a;
+            --lotus: #9b3a78;
+            --lotus-p: #e080b8;
+
+            --silver: #90b8e0;
+            --silver-p: #d8eeff;
+            --silver-glow: rgba(200, 230, 255, .35);
+
+            --sankashti-accent: #e85c18;
+            --sankashti-glow: rgba(232, 92, 24, .4);
+            --amavasya-accent: #c8962a;
+            --purnima-accent: #90b8e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--void);
+            color: var(--gold-p);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.15rem;
+            /* Increased base size */
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* ══ CANVAS ══ */
+        #cosmos {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ══ GRAIN OVERLAY ══ */
+        .grain {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: .028;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        /* ══ NEBULA LAYERS ══ */
+        .nebula {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -5%, rgba(16, 38, 110, .7) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 5% 50%, rgba(60, 15, 80, .35) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 60% at 95% 45%, rgba(10, 45, 120, .3) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 55% at 50% 105%, rgba(100, 30, 70, .4) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 75% 25%, rgba(180, 80, 20, .12) 0%, transparent 50%);
+        }
+
+        .page {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+        .hero {
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* sacred geometry behind hero */
+        .geo-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            border: 1px solid rgba(200, 150, 42, .06);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .geo-1 {
+            width: 440px;
+            height: 440px;
+            animation: grot 80s linear infinite;
+        }
+
+        .geo-2 {
+            width: 620px;
+            height: 620px;
+            border-color: rgba(200, 150, 42, .04);
+            animation: grot 130s linear infinite reverse;
+        }
+
+        .geo-3 {
+            width: 820px;
+            height: 820px;
+            border-color: rgba(200, 150, 42, .025);
+            animation: grot 200s linear infinite;
+        }
+
+        .geo-4 {
+            width: 1060px;
+            height: 1060px;
+            border-color: rgba(200, 150, 42, .015);
+            animation: grot 300s linear infinite reverse;
+        }
+
+        @keyframes grot {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Spoke lines on geo-1 */
+        .geo-1::before,
+        .geo-1::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: rgba(200, 150, 42, .07);
+        }
+
+        .geo-1::before {
+            width: 1px;
+            height: 100%;
+            transform: translate(-50%, -50%);
+        }
+
+        .geo-1::after {
+            width: 100%;
+            height: 1px;
+            transform: translate(-50%, -50%);
+        }
+
+        /* ── BIG MOON SVG ── */
+        .hero-moon-wrap {
+            position: relative;
+            margin-bottom: 2.5rem;
+            width: 220px;
+            height: 220px;
+        }
+
+        .hero-moon-glow {
+            position: absolute;
+            inset: -60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 150, 42, .18) 0%, transparent 65%);
+            animation: hmg 5s ease-in-out infinite;
+        }
+
+        @keyframes hmg {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: .7;
+            }
+
+            50% {
+                transform: scale(1.25);
+                opacity: 1;
+            }
+        }
+
+        .hero-moon-svg {
+            width: 220px;
+            height: 220px;
+            filter: drop-shadow(0 0 18px rgba(200, 150, 42, .55)) drop-shadow(0 0 50px rgba(200, 150, 42, .2));
+            animation: mfloat 8s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes mfloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        /* orbit dot */
+        .orbit-path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 290px;
+            height: 290px;
+            border-radius: 50%;
+            border: 1px dashed rgba(200, 150, 42, .14);
+            transform: translate(-50%, -50%);
+            animation: orb 12s linear infinite;
+        }
+
+        .orbit-dot {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold-b);
+            box-shadow: 0 0 12px var(--gold-b), 0 0 24px rgba(242, 200, 74, .5);
+            transform: translate(-50%, -50%);
+        }
+
+        .orbit-path-2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 370px;
+            height: 370px;
+            border-radius: 50%;
+            border: 1px dashed rgba(144, 184, 224, .08);
+            transform: translate(-50%, -50%);
+            animation: orb 22s linear infinite reverse;
+        }
+
+        .orbit-dot-2 {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--silver);
+            box-shadow: 0 0 8px var(--silver);
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes orb {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* ── HERO TEXT ── */
+        .hero-eyebrow {
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: var(--silver-p);
+            opacity: .55;
+            letter-spacing: .4em;
+            margin-bottom: .8rem;
+            animation: fd 1s ease both;
+        }
+
+        .hero-title {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 900;
+            font-size: clamp(3rem, 10vw, 7.5rem);
+            /* Scaled up */
+            letter-spacing: .15em;
+            background: linear-gradient(160deg, #f2c84a 0%, #e06818 50%, #c22a0a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 40px rgba(232, 92, 24, .6));
+            line-height: 1;
+            margin-bottom: .8rem;
+            animation: fd 1.2s ease both;
+            text-transform: uppercase;
+        }
+
+        .hero-sub {
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: clamp(1.1rem, 3vw, 1.8rem);
+            color: var(--silver-p);
+            opacity: .75;
+            letter-spacing: .14em;
+            animation: fd 1.4s ease both;
+            margin-bottom: .6rem;
+        }
+
+        .hero-tagline {
+            font-style: italic;
+            font-size: clamp(.85rem, 2vw, 1.1rem);
+            color: rgba(200, 220, 240, .4);
+            letter-spacing: .15em;
+            animation: fd 1.6s ease both;
+        }
+
+        @keyframes fd {
+            from {
+                opacity: 0;
+                transform: translateY(-22px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* hero scroll hint */
+        .scroll-hint {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .4rem;
+            opacity: .3;
+            animation: bounce 2.5s ease-in-out infinite;
+        }
+
+        .scroll-hint span {
+            font-family: 'Cinzel', serif;
+            font-size: .55rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .scroll-arrow {
+            width: 1px;
+            height: 32px;
+            background: linear-gradient(to bottom, transparent, var(--gold));
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                opacity: .25;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                opacity: .5;
+                transform: translateX(-50%) translateY(5px);
+            }
+        }
+
+        /* ══════════════════════════════════
+   API CONFIG BAR
+══════════════════════════════════ */
+        .api-bar {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem 1rem;
+        }
+
+        .api-inner {
+            background: rgba(3, 8, 15, .85);
+            border: 1px solid rgba(200, 150, 42, .2);
+            backdrop-filter: blur(10px);
+            padding: .7rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            flex-wrap: wrap;
+        }
+
+        .api-lbl {
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: .65;
+            flex-shrink: 0;
+        }
+
+        .api-in {
+            flex: 1;
+            min-width: 220px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--silver-p);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+        }
+
+        .api-in::placeholder {
+            color: rgba(200, 220, 240, .25);
+            font-style: italic;
+        }
+
+        .toggle-btn {
+            padding: .32rem .75rem;
+            font-family: 'Cinzel', serif;
+            font-size: .55rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            border: 1px solid rgba(200, 150, 42, .25);
+            background: none;
+            color: rgba(200, 150, 42, .5);
+            cursor: pointer;
+            transition: all .3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold-b);
+        }
+
+        /* ══════════════════════════════════
+   SECTION WRAPPER
+══════════════════════════════════ */
+        .sections {
+            max-width: 1100px;
+            /* Increased from 900px */
+            margin: 0 auto;
+            padding: 0 1.5rem 8rem;
+        }
+
+        /* Section label row */
+        .sec-label-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .sec-label-row .ln {
+            flex: 1;
+            height: 1px;
+        }
+
+        .sec-label-row .ln-l {
+            background: linear-gradient(90deg, transparent, currentColor);
+        }
+
+        .sec-label-row .ln-r {
+            background: linear-gradient(90deg, currentColor, transparent);
+        }
+
+        .sec-eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: .62rem;
+            letter-spacing: .38em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* ══════════════════════════════════
+   ① SANKASHTI — HERO SECTION (BIG)
+══════════════════════════════════ */
+        .sankashti-section {
+            margin-bottom: 4rem;
+            animation: secfd .8s ease both .2s;
+        }
+
+        @keyframes secfd {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sankashti-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(145deg, rgba(30, 10, 5, .92), rgba(8, 4, 2, .97));
+            border: 1px solid rgba(232, 92, 24, .3);
+            min-height: 340px;
+        }
+
+        .sankashti-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--vermillion), var(--saffron), #f8a030, var(--saffron), var(--vermillion), transparent);
+        }
+
+        .sankashti-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(232, 92, 24, .07) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        /* big decorative crescent on right */
+        .sank-crescent {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 280px;
+            height: 280px;
+            opacity: .06;
+            pointer-events: none;
+        }
+
+        .sank-layout {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0;
+            align-items: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Left accent strip */
+        .sank-strip {
+            width: 5px;
+            background: linear-gradient(to bottom, var(--vermillion), var(--saffron), #f8a030, var(--saffron), var(--vermillion));
+        }
+
+        .sank-body {
+            padding: 2.5rem 2rem 2.5rem 2rem;
+        }
+
+        .sank-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .28rem .9rem;
+            border: 1px solid rgba(232, 92, 24, .45);
+            background: rgba(232, 92, 24, .1);
+            margin-bottom: 1.2rem;
+        }
+
+        .sank-badge-icon {
+            font-size: 1rem;
+        }
+
+        .sank-badge-text {
+            font-family: 'Cinzel', serif;
+            font-size: .6rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--saffron);
+        }
+
+        .sank-moon-row {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.6rem;
+        }
+
+        .sank-moon-icon {
+            font-size: 4.5rem;
+            filter: drop-shadow(0 0 20px var(--sankashti-glow)) drop-shadow(0 0 50px rgba(232, 92, 24, .2));
+            animation: sank-pulse 3.5s ease-in-out infinite;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        @keyframes sank-pulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 15px var(--sankashti-glow));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 35px rgba(232, 92, 24, .7)) drop-shadow(0 0 80px rgba(232, 92, 24, .25));
+            }
+        }
+
+        .sank-text-group {}
+
+        .sank-main-date {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+            color: var(--saffron);
+            font-weight: 700;
+            filter: drop-shadow(0 0 10px rgba(232, 92, 24, .5));
+            margin-bottom: .2rem;
+            letter-spacing: .05em;
+        }
+
+        .sank-raw-date {
+            font-size: .78rem;
+            color: rgba(200, 180, 150, .4);
+            font-style: italic;
+            margin-bottom: .6rem;
+        }
+
+        .sank-days-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .35rem 1rem;
+            background: rgba(232, 92, 24, .12);
+            border: 1px solid rgba(232, 92, 24, .3);
+        }
+
+        .sank-days-num {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--gold-b);
+            line-height: 1;
+        }
+
+        .sank-days-lbl {
+            font-family: 'Cinzel', serif;
+            font-size: .6rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--silver);
+            opacity: .7;
+        }
+
+        .sank-about {
+            font-style: italic;
+            font-size: clamp(.95rem, 2vw, 1.15rem);
+            color: var(--silver-p);
+            line-height: 1.85;
+            opacity: .88;
+            border-left: 2px solid rgba(232, 92, 24, .4);
+            padding-left: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .sank-invoke {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            margin-top: 1.5rem;
+            padding: .75rem 1.8rem;
+            font-family: 'Cinzel', serif;
+            font-size: .72rem;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            border: 1px solid var(--saffron);
+            background: linear-gradient(135deg, rgba(232, 92, 24, .18), rgba(232, 92, 24, .05));
+            color: var(--saffron);
+            cursor: pointer;
+            transition: all .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sank-invoke::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(232, 92, 24, .2), transparent);
+            transition: left .5s;
+        }
+
+        .sank-invoke:hover {
+            background: linear-gradient(135deg, rgba(232, 92, 24, .35), rgba(232, 92, 24, .12));
+            box-shadow: 0 0 30px rgba(232, 92, 24, .3);
+        }
+
+        .sank-invoke:hover::before {
+            left: 100%;
+        }
+
+        .sank-invoke:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        /* ══════════════════════════════════
+   ② AMAVASYA — MEDIUM
+══════════════════════════════════ */
+        .amavasya-section {
+            margin-bottom: 3rem;
+            animation: secfd .8s ease both .4s;
+        }
+
+        .amavasya-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(145deg, rgba(6, 12, 26, .92), rgba(3, 6, 12, .97));
+            border: 1px solid rgba(200, 150, 42, .22);
+        }
+
+        .amavasya-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-b), var(--gold), var(--gold-dim), transparent);
+        }
+
+        .amavasya-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 50% 70% at 85% 50%, rgba(200, 150, 42, .05) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .am-layout {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        .am-strip {
+            width: 3px;
+            background: linear-gradient(to bottom, var(--gold-dim), var(--gold), var(--gold-b), var(--gold), var(--gold-dim));
+        }
+
+        .am-body {
+            padding: 2rem 1.8rem 2rem 1.8rem;
+        }
+
+        .am-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .25rem .85rem;
+            border: 1px solid rgba(200, 150, 42, .35);
+            background: rgba(200, 150, 42, .08);
+            margin-bottom: 1.1rem;
+        }
+
+        .am-badge-text {
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .am-moon-row {
+            display: flex;
+            align-items: center;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .am-moon-icon {
+            font-size: 3.5rem;
+            filter: drop-shadow(0 0 16px var(--gold-glow));
+            animation: am-glow 4s ease-in-out infinite;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        @keyframes am-glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px var(--gold-glow));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 28px rgba(200, 150, 42, .7)) drop-shadow(0 0 60px rgba(200, 150, 42, .2));
+            }
+        }
+
+        .am-main-date {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+            color: var(--gold-b);
+            font-weight: 600;
+            filter: drop-shadow(0 0 8px rgba(200, 150, 42, .4));
+            margin-bottom: .2rem;
+            letter-spacing: .05em;
+        }
+
+        .am-raw-date {
+            font-size: .73rem;
+            color: rgba(200, 180, 150, .38);
+            font-style: italic;
+            margin-bottom: .55rem;
+        }
+
+        .am-days-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .3rem .9rem;
+            background: rgba(200, 150, 42, .1);
+            border: 1px solid rgba(200, 150, 42, .25);
+        }
+
+        .am-days-num {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 900;
+            font-size: 1.25rem;
+            color: var(--gold-b);
+            line-height: 1;
+        }
+
+        .am-days-lbl {
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--silver);
+            opacity: .65;
+        }
+
+        .am-about {
+            font-style: italic;
+            font-size: clamp(.88rem, 2vw, 1.05rem);
+            color: var(--silver-p);
+            line-height: 1.85;
+            opacity: .82;
+            border-left: 2px solid rgba(200, 150, 42, .3);
+            padding-left: 1.1rem;
+            margin-top: .95rem;
+        }
+
+        .am-invoke {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            margin-top: 1.3rem;
+            padding: .68rem 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-size: .68rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            border: 1px solid var(--gold);
+            background: linear-gradient(135deg, rgba(200, 150, 42, .15), rgba(200, 150, 42, .04));
+            color: var(--gold-b);
+            cursor: pointer;
+            transition: all .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .am-invoke::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(200, 150, 42, .18), transparent);
+            transition: left .5s;
+        }
+
+        .am-invoke:hover {
+            background: linear-gradient(135deg, rgba(200, 150, 42, .3), rgba(200, 150, 42, .1));
+            box-shadow: 0 0 25px rgba(200, 150, 42, .25);
+        }
+
+        .am-invoke:hover::before {
+            left: 100%;
+        }
+
+        .am-invoke:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        /* am year grid */
+        .am-year-section {
+            margin-top: 1.6rem;
+            border-top: 1px solid rgba(200, 150, 42, .1);
+            padding-top: 1.4rem;
+        }
+
+        .am-year-label {
+            font-family: 'Cinzel', serif;
+            font-size: .6rem;
+            letter-spacing: .32em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: .65;
+            margin-bottom: 1rem;
+        }
+
+        .am-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: .7rem;
+        }
+
+        .am-year-card {
+            background: rgba(3, 6, 12, .7);
+            border: 1px solid rgba(200, 150, 42, .12);
+            padding: 1rem 1.1rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .25s, transform .2s;
+            cursor: default;
+        }
+
+        .am-year-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(200, 150, 42, .28), transparent);
+        }
+
+        .am-year-card:hover {
+            border-color: rgba(200, 150, 42, .35);
+            transform: translateY(-2px);
+        }
+
+        .am-yc-idx {
+            position: absolute;
+            top: .6rem;
+            right: .8rem;
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            color: var(--gold);
+            opacity: .28;
+        }
+
+        .am-yc-moon {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: .35rem;
+        }
+
+        .am-yc-date {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            color: var(--gold-b);
+            margin-bottom: .08rem;
+        }
+
+        .am-yc-raw {
+            font-size: .6rem;
+            color: var(--silver);
+            opacity: .38;
+            font-style: italic;
+            margin-bottom: .45rem;
+        }
+
+        .am-yc-about {
+            font-size: .78rem;
+            color: var(--silver-p);
+            line-height: 1.65;
+            opacity: .75;
+            font-style: italic;
+        }
+
+        /* endpoint selector for amavasya */
+        .am-ep-row {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .am-ep {
+            padding: .45rem 1rem;
+            font-family: 'Cinzel', serif;
+            font-size: .62rem;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            border: 1px solid rgba(200, 150, 42, .2);
+            background: rgba(200, 150, 42, .04);
+            color: rgba(200, 180, 120, .55);
+            cursor: pointer;
+            transition: all .25s;
+        }
+
+        .am-ep:hover {
+            border-color: rgba(200, 150, 42, .5);
+            color: var(--gold);
+        }
+
+        .am-ep.active {
+            border-color: var(--gold);
+            color: var(--gold-b);
+            background: rgba(200, 150, 42, .12);
+        }
+
+        /* year param */
+        .am-year-param {
+            display: none;
+            margin-bottom: .85rem;
+            animation: secfd .3s ease both;
+        }
+
+        .am-year-param.show {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .am-p-lbl {
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: .7;
+            white-space: nowrap;
+        }
+
+        .am-p-in {
+            flex: 1;
+            background: rgba(2, 4, 8, .8);
+            border: 1px solid rgba(200, 150, 42, .18);
+            padding: .48rem .85rem;
+            color: var(--gold-p);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color .3s;
+        }
+
+        .am-p-in:focus {
+            border-color: rgba(200, 150, 42, .5);
+        }
+
+        .am-p-in::placeholder {
+            color: rgba(200, 220, 240, .25);
+            font-style: italic;
+        }
+
+        /* ══════════════════════════════════
+   ③ PURNIMA — SMALLEST
+══════════════════════════════════ */
+        .purnima-section {
+            margin-bottom: 2.5rem;
+            animation: secfd .8s ease both .6s;
+        }
+
+        .purnima-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(145deg, rgba(8, 15, 28, .85), rgba(4, 8, 16, .95));
+            border: 1px solid rgba(144, 184, 224, .18);
+        }
+
+        .purnima-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(144, 184, 224, .3), rgba(216, 238, 255, .6), rgba(144, 184, 224, .3), transparent);
+        }
+
+        .purnima-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 90% 50%, rgba(144, 184, 224, .04) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .pur-layout {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            padding: 1.8rem 2rem;
+            position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
+        }
+
+        .pur-moon {
+            font-size: 3rem;
+            filter: drop-shadow(0 0 14px var(--silver-glow));
+            animation: pur-glow 5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pur-glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px var(--silver-glow));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 28px rgba(200, 230, 255, .55)) drop-shadow(0 0 60px rgba(180, 220, 255, .15));
+            }
+        }
+
+        .pur-info {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .pur-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .22rem .75rem;
+            border: 1px solid rgba(144, 184, 224, .28);
+            background: rgba(144, 184, 224, .06);
+            margin-bottom: .9rem;
+        }
+
+        .pur-badge-text {
+            font-family: 'Cinzel', serif;
+            font-size: .56rem;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--silver);
+        }
+
+        .pur-date {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.1rem, 3vw, 1.55rem);
+            color: var(--silver-p);
+            font-weight: 600;
+            margin-bottom: .18rem;
+        }
+
+        .pur-raw {
+            font-size: .68rem;
+            color: rgba(180, 210, 240, .35);
+            font-style: italic;
+            margin-bottom: .65rem;
+        }
+
+        .pur-about {
+            font-style: italic;
+            font-size: .92rem;
+            color: var(--silver-p);
+            line-height: 1.8;
+            opacity: .72;
+        }
+
+        .pur-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .5rem;
+            flex-shrink: 0;
+        }
+
+        .pur-days-orb {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, rgba(20, 35, 60, .9), rgba(3, 6, 12, 1));
+            border: 1px solid rgba(144, 184, 224, .3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(144, 184, 224, .1);
+        }
+
+        .pur-days-num {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 900;
+            font-size: 1.6rem;
+            color: var(--silver-p);
+            line-height: 1;
+        }
+
+        .pur-days-lbl {
+            font-family: 'Cinzel', serif;
+            font-size: .52rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--silver);
+            opacity: .6;
+        }
+
+        .pur-invoke {
+            padding: .55rem 1.1rem;
+            font-family: 'Cinzel', serif;
+            font-size: .6rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            border: 1px solid rgba(144, 184, 224, .3);
+            background: rgba(144, 184, 224, .05);
+            color: var(--silver-p);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .pur-invoke:hover {
+            background: rgba(144, 184, 224, .12);
+            box-shadow: 0 0 20px rgba(144, 184, 224, .12);
+        }
+
+        .pur-invoke:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        /* ══ STATUS CHIPS ══ */
+        .status-chip {
+            padding: .6rem 1rem;
+            border-left: 3px solid;
+            font-size: .82rem;
+            margin-top: .8rem;
+            display: none;
+            animation: secfd .3s ease;
+        }
+
+        .sc-load {
+            border-color: var(--silver);
+            background: rgba(144, 184, 224, .06);
+            color: var(--silver-p);
+        }
+
+        .sc-ok {
+            border-color: var(--gold);
+            background: rgba(200, 150, 42, .06);
+            color: var(--gold-b);
+        }
+
+        .sc-err {
+            border-color: var(--vermillion);
+            background: rgba(192, 42, 10, .07);
+            color: #f09080;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border: 2px solid rgba(200, 150, 42, .25);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: sp .8s linear infinite;
+            vertical-align: middle;
+            margin-right: .4rem;
+        }
+
+        @keyframes sp {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ══ JSON ══ */
+        .json-wrap {
+            margin-top: .8rem;
+        }
+
+        .json-toggle {
+            padding: .38rem .9rem;
+            font-family: 'Cinzel', serif;
+            font-size: .58rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            border: 1px solid rgba(138, 176, 216, .2);
+            background: transparent;
+            color: rgba(138, 176, 216, .5);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .json-toggle:hover {
+            background: rgba(138, 176, 216, .06);
+            border-color: rgba(138, 176, 216, .4);
+            color: var(--silver);
+        }
+
+        pre.jraw {
+            background: rgba(1, 3, 6, .95);
+            border: 1px solid rgba(200, 150, 42, .1);
+            padding: .9rem;
+            font-size: .68rem;
+            font-family: 'Courier New', monospace;
+            color: rgba(200, 223, 240, .6);
+            line-height: 1.65;
+            overflow: auto;
+            max-height: 240px;
+            display: none;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: .45rem;
+        }
+
+        pre.jraw::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        pre.jraw::-webkit-scrollbar-thumb {
+            background: rgba(200, 150, 42, .3);
+        }
+
+        .jk {
+            color: #8ab0d8;
+        }
+
+        .jv {
+            color: #f0c040;
+        }
+
+        .js {
+            color: #a0d0a0;
+        }
+
+        .jn {
+            color: #e07070;
+        }
+
+        /* ══ SLOKA / FOOTER ══ */
+        .footer-sloka {
+            text-align: center;
+            padding: 3rem 1.5rem 1.5rem;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        .sloka-orn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .sloka-orn .ln {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(200, 150, 42, .35), transparent);
+        }
+
+        .sloka-orn .sym {
+            color: var(--lotus-p);
+            font-size: 1.3rem;
+        }
+
+        .sloka-text {
+            font-style: italic;
+            font-size: 1.05rem;
+            line-height: 2.1;
+            color: var(--silver-p);
+            opacity: .55;
+        }
+
+        .sloka-deva {
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: 1rem;
+            color: rgba(200, 150, 42, .45);
+            margin-top: 1.1rem;
+            letter-spacing: .15em;
+        }
+
+        /* ══ GENERIC TABS — REPLACES am-ep ══ */
+        .ep-row {
+            display: flex;
+            gap: .8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .ep-tab {
+            padding: .6rem 1.4rem;
+            font-family: 'Cinzel', serif;
+            font-size: .75rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, .15);
+            background: rgba(255, 255, 255, .03);
+            color: rgba(255, 255, 255, .4);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .ep-tab:hover {
+            border-color: rgba(255, 255, 255, .4);
+            color: #fff;
+        }
+
+        .ep-tab.active {
+            border-color: currentColor;
+            color: #fff;
+            background: rgba(255, 255, 255, .1);
+        }
+
+        /* ══ GANESHA WALK ══ */
+        .ganesha-walk-container {
+            position: fixed;
+            bottom: 10px;
+            left: -100px;
+            z-index: 10;
+            font-size: 3.5rem;
+            /* Larger */
+            pointer-events: none;
+            filter: drop-shadow(0 0 15px var(--sankashti-glow));
+            animation: ganesha-move 35s linear infinite;
+            /* Slower, more majestic */
+        }
+
+        @keyframes ganesha-move {
+            from {
+                left: -100px;
+                transform: scaleX(1);
+            }
+
+            49% {
+                transform: scaleX(1);
+            }
+
+            50% {
+                left: calc(100% + 100px);
+                transform: scaleX(-1);
+            }
+
+            99% {
+                transform: scaleX(-1);
+            }
+
+            to {
+                left: -100px;
+            }
+        }
+
+        /* ══ YEAR SECTION (SCALED) ══ */
+        .year-section {
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+            padding-top: 2rem;
+        }
+
+        .year-label {
+            font-family: 'Cinzel', serif;
+            font-size: .8rem;
+            letter-spacing: .4em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .year-card {
+            background: rgba(0, 0, 0, .4);
+            border: 1px solid rgba(255, 255, 255, .1);
+            padding: 1.5rem;
+            transition: all .3s;
+        }
+
+        .year-card:hover {
+            border-color: currentColor;
+            transform: translateY(-5px);
+        }
+
+        /* Scaling existing sections */
+        .sankashti-card {
+            min-height: 450px;
+            padding: 1rem;
+        }
+
+        .amavasya-card {
+            min-height: 400px;
+            padding: 1rem;
+        }
+
+        .purnima-card {
+            min-height: 350px;
+            padding: 1rem;
+        }
+
+        .btn-back {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            padding: 0.4rem 0.8rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+        footer {
+            font-size: 1rem;
+            /* Scaled up */
+            opacity: .4;
+            padding: 3rem 1rem 6rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CANVAS COSMOS -->
+    <canvas id="cosmos"></canvas>
+    <div class="nebula"></div>
+    <div class="grain"></div>
+    <div class="ganesha-walk-container" id="ganesha-sprite">🐘</div>
+
+    <div class="page">
+
+        <!-- ══════════ HERO ══════════ -->
+        <section class="hero">
+            <!-- sacred rings -->
+            <div class="geo-ring geo-1"></div>
+            <div class="geo-ring geo-2"></div>
+            <div class="geo-ring geo-3"></div>
+            <div class="geo-ring geo-4"></div>
+
+            <!-- moon -->
+            <div class="hero-moon-wrap">
+                <div class="orbit-path">
+                    <div class="orbit-dot"></div>
+                </div>
+                <div class="orbit-path-2">
+                    <div class="orbit-dot-2"></div>
+                </div>
+                <div class="hero-moon-glow"></div>
+                <svg class="hero-moon-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="mg" cx="38%" cy="32%" r="65%">
+                            <stop offset="0%" stop-color="#1a2f5a" />
+                            <stop offset="60%" stop-color="#060d1e" />
+                            <stop offset="100%" stop-color="#020408" />
+                        </radialGradient>
+                        <radialGradient id="moonshine" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="rgba(200,150,42,.08)" />
+                            <stop offset="100%" stop-color="rgba(200,150,42,0)" />
+                        </radialGradient>
+                        <filter id="blur5">
+                            <feGaussianBlur stdDeviation="5" />
+                        </filter>
+                        <clipPath id="mc">
+                            <circle cx="100" cy="100" r="97" />
+                        </clipPath>
+                    </defs>
+                    <!-- glow behind -->
+                    <circle cx="100" cy="100" r="97" fill="rgba(200,150,42,.06)" filter="url(#blur5)" />
+                    <!-- moon body -->
+                    <circle cx="100" cy="100" r="97" fill="url(#mg)" />
+                    <!-- craters -->
+                    <circle cx="68" cy="72" r="8" fill="rgba(0,0,0,.25)" clip-path="url(#mc)" />
+                    <circle cx="68" cy="72" r="6" fill="rgba(10,20,45,.4)" clip-path="url(#mc)" />
+                    <circle cx="130" cy="58" r="5" fill="rgba(0,0,0,.2)" clip-path="url(#mc)" />
+                    <circle cx="130" cy="58" r="3.5" fill="rgba(8,16,36,.35)" clip-path="url(#mc)" />
+                    <circle cx="85" cy="130" r="11" fill="rgba(0,0,0,.18)" clip-path="url(#mc)" />
+                    <circle cx="85" cy="130" r="8" fill="rgba(6,14,30,.3)" clip-path="url(#mc)" />
+                    <circle cx="140" cy="115" r="7" fill="rgba(0,0,0,.15)" clip-path="url(#mc)" />
+                    <circle cx="50" cy="115" r="4" fill="rgba(0,0,0,.2)" clip-path="url(#mc)" />
+                    <!-- limb highlight -->
+                    <path d="M 35 55 Q 8 100 35 148" stroke="rgba(200,180,120,.12)" stroke-width="18" fill="none"
+                        stroke-linecap="round" clip-path="url(#mc)" />
+                    <!-- border ring -->
+                    <circle cx="100" cy="100" r="97" fill="none" stroke="rgba(200,150,42,.35)" stroke-width="1.5" />
+                    <circle cx="100" cy="100" r="93" fill="none" stroke="rgba(200,150,42,.08)" stroke-width="1" />
+                </svg>
+            </div>
+
+            <div class="hero-eyebrow">चंद्र दर्शन</div>
+            <h1 class="hero-title">Lunar Temple</h1>
+            <div class="hero-tagline">Sacred Timekeeping of the Ancient Hindu Cosmos</div>
+
+            <div class="scroll-hint">
+                <span>Scroll</span>
+                <div class="scroll-arrow"></div>
+            </div>
+        </section>
+
+        <!-- ══ API BAR ══ -->
+        <div class="api-bar">
+            <div class="api-inner">
+                <span class="api-lbl">API</span>
+                <input class="api-in" id="base-url" type="text" value="https://amavasya-api.onrender.com"
+                    placeholder="https://amavasya-api.onrender.com" />
+                <button class="toggle-btn" onclick="toggleBase()">⇄ Local</button>
+            </div>
+        </div>
+
+        <!-- ══════════ SECTIONS ══════════ -->
+        <div class="sections">
+
+            <!-- ① SANKASHTI — FEATURED -->
+            <div class="sankashti-section">
+                <div class="sec-label-row" style="color:var(--saffron);">
+                    <div class="ln ln-l"></div>
+                    <span class="sec-eyebrow"
+                        style="font-family:'Cinzel Decorative', cursive; font-weight:700; color:var(--saffron); letter-spacing:0.15em; font-size:1.1rem;">🕉
+                        Sankashti Chaturthi · प्रमुख</span>
+                    <div class="ln ln-r"></div>
+                </div>
+
+                <div class="sankashti-card">
+                    <!-- decorative bg crescent -->
+                    <svg class="sank-crescent" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 240 140 A 100 100 0 1 1 240.01 140.01 Z M 240 140 A 60 60 0 1 0 240.01 140.01 Z"
+                            fill="white" opacity=".5" />
+                    </svg>
+
+                    <div class="sank-layout">
+                        <div class="sank-strip"></div>
+                        <div class="sank-body">
+                            <div class="sank-badge">
+                                <span class="sank-badge-icon">🙏</span>
+                                <span class="sank-badge-text">Ganesha's Sacred Day · Most Auspicious</span>
+                            </div>
+
+                            <!-- endpoint tabs -->
+                            <div class="ep-row">
+                                <button class="ep-tab" id="sank-ep-today" onclick="selectSankEp('today')">Today</button>
+                                <button class="ep-tab active" id="sank-ep-next"
+                                    onclick="selectSankEp('next')">Next</button>
+                                <button class="ep-tab" id="sank-ep-year" onclick="selectSankEp('year')">Year</button>
+                            </div>
+                            <div class="am-year-param" id="sank-year-param">
+                                <span class="am-p-lbl">Year</span>
+                                <input class="am-p-in" id="sank-year-in" type="number" placeholder="e.g. 2026"
+                                    value="2026" />
+                            </div>
+
+                            <!-- EP selector hidden — just next -->
+                            <div id="sank-content-idle"
+                                style="color:rgba(200,160,100,.4);font-style:italic;font-size:1.1rem;margin-bottom:1rem;">
+                                Click below to invoke the oracle and reveal the next Sankashti…
+                            </div>
+                            <div id="sank-results-container" style="display:none;">
+                                <button class="btn-back" onclick="resetSank()">← Back</button>
+                                <div id="sank-result-today" style="display:none;">
+                                    <div class="sank-moon-row">
+                                        <div class="sank-moon-icon">🐘</div>
+                                        <div class="sank-text-group">
+                                            <div id="sank-today-status"
+                                                style="font-family:'Noto Serif Devanagari',serif;font-size:1.8rem;color:var(--saffron);margin-bottom:.5rem;">
+                                                —</div>
+                                            <div class="sank-main-date" id="sank-today-date">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="sank-result-next" style="display:none;">
+                                    <div class="sank-moon-row">
+                                        <div class="sank-moon-icon">🌛</div>
+                                        <div class="sank-text-group">
+                                            <div class="sank-main-date" id="sank-date">—</div>
+                                            <div class="sank-raw-date" id="sank-raw">—</div>
+                                            <div class="sank-days-chip">
+                                                <span class="sank-days-num" id="sank-days">—</span>
+                                                <span class="sank-days-lbl">days away</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="sank-about" id="sank-about">—</div>
+                                </div>
+
+                                <div id="sank-result-year" style="display:none;">
+                                    <div class="year-section">
+                                        <div class="year-label" id="sank-year-heading">—</div>
+                                        <div class="year-grid" id="sank-year-grid"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="sank-invoke" id="sank-btn" onclick="invokeSankashti()">
+                                🌛 &nbsp;Invoke Sankashti
+                            </button>
+                            <div class="status-chip" id="sank-status"></div>
+                            <div class="json-wrap">
+                                <button class="json-toggle" onclick="toggleJson('sank-json')">{ } Raw JSON</button>
+                                <pre class="jraw" id="sank-json"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ② AMAVASYA -->
+                <div class="amavasya-section">
+                    <div class="sec-label-row" style="color:var(--gold);">
+                        <div class="ln ln-l"></div>
+                        <span class="sec-eyebrow" style="color:var(--gold);">🌑 Amavasya · अमावस्या</span>
+                        <div class="ln ln-r"></div>
+                    </div>
+
+                    <div class="amavasya-card">
+                        <div class="am-layout">
+                            <div class="am-strip"></div>
+                            <div class="am-body">
+                                <div class="am-badge">
+                                    <span class="am-badge-text">New Moon · Pitru Tarpan · Dark Night</span>
+                                </div>
+
+                                <!-- endpoint tabs -->
+                                <div class="am-ep-row">
+                                    <button class="am-ep" id="am-ep-today" onclick="selectAmEp('today')">Today</button>
+                                    <button class="am-ep active" id="am-ep-next"
+                                        onclick="selectAmEp('next')">Next</button>
+                                    <button class="am-ep" id="am-ep-year" onclick="selectAmEp('year')">Year</button>
+                                </div>
+                                <div class="am-year-param" id="am-year-param">
+                                    <span class="am-p-lbl">Year</span>
+                                    <input class="am-p-in" id="am-year-in" type="number" placeholder="e.g. 2026"
+                                        value="2026" />
+                                </div>
+
+                                <div id="am-content-idle"
+                                    style="color:rgba(200,160,80,.35);font-style:italic;font-size:1.1rem;margin-bottom:1rem;">
+                                    Select an endpoint and invoke the oracle…
+                                </div>
+
+                                <div id="am-results-container" style="display:none;">
+                                    <button class="btn-back" onclick="resetAm()">← Back</button>
+
+                                    <!-- today result -->
+                                    <div id="am-result-today" style="display:none;">
+                                        <div class="am-moon-row">
+                                            <div class="am-moon-icon" id="am-today-emoji">🌑</div>
+                                            <div>
+                                                <div id="am-today-status"
+                                                    style="font-family:'Noto Serif Devanagari',serif;font-size:clamp(1.2rem,3vw,1.7rem);margin-bottom:.3rem;">
+                                                    —</div>
+                                                <div class="am-main-date" id="am-today-date">—</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- next result -->
+                                    <div id="am-result-next" style="display:none;">
+                                        <div class="am-moon-row">
+                                            <div class="am-moon-icon">🌑</div>
+                                            <div class="sank-text-group">
+                                                <div class="am-main-date" id="am-next-date">—</div>
+                                                <div class="am-raw-date" id="am-next-raw">—</div>
+                                                <div class="am-days-chip">
+                                                    <span class="am-next-days-num" id="am-next-days">—</span>
+                                                    <span class="am-days-lbl">days away</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="am-about" id="am-next-about">—</div>
+                                    </div>
+
+                                    <!-- year result -->
+                                    <div id="am-result-year" style="display:none;">
+                                        <div class="year-section">
+                                            <div class="year-label" id="am-year-heading">—</div>
+                                            <div class="year-grid" id="am-year-grid"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button class="am-invoke" id="am-btn" onclick="invokeAmavasya()">
+                                    🌑 &nbsp;Invoke Oracle
+                                </button>
+                                <div class="status-chip" id="am-status"></div>
+                                <div class="json-wrap">
+                                    <button class="json-toggle" onclick="toggleJson('am-json')">{ } Raw
+                                        JSON</button>
+                                    <pre class="jraw" id="am-json"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ③ PURNIMA -->
+                    <div class="purnima-section">
+                        <div class="sec-label-row" style="color:var(--silver);">
+                            <div class="ln ln-l"></div>
+                            <span class="sec-eyebrow" style="color:var(--silver);">🌕 Purnima · पूर्णिमा</span>
+                            <div class="ln ln-r"></div>
+                        </div>
+
+                        <div class="purnima-card">
+                            <div class="pur-layout">
+                                <div class="pur-moon">🌕</div>
+                                <div class="pur-info">
+                                    <div class="ep-row">
+                                        <button class="ep-tab" id="pur-ep-today"
+                                            onclick="selectPurEp('today')">Today</button>
+                                        <button class="ep-tab active" id="pur-ep-next"
+                                            onclick="selectPurEp('next')">Next</button>
+                                        <button class="ep-tab" id="pur-ep-year"
+                                            onclick="selectPurEp('year')">Year</button>
+                                    </div>
+                                    <div class="am-year-param" id="pur-year-param">
+                                        <span class="am-p-lbl">Year</span>
+                                        <input class="am-p-in" id="pur-year-in" type="number" placeholder="e.g. 2026"
+                                            value="2026" />
+                                    </div>
+
+                                    <div id="pur-idle"
+                                        style="color:rgba(180,210,240,.3);font-style:italic;font-size:1.1rem;margin-bottom:1rem;">
+                                        Invoke to reveal the cycles of the full moon…</div>
+
+                                    <div id="pur-results-container" style="display:none;">
+                                        <button class="btn-back" onclick="resetPur()">← Back</button>
+
+                                        <div id="pur-result-today" style="display:none;">
+                                            <div class="pur-moon-row">
+                                                <div class="pur-moon" style="font-size:4rem;">🌕</div>
+                                                <div>
+                                                    <div id="pur-today-status"
+                                                        style="font-family:'Noto Serif Devanagari',serif;font-size:1.8rem;color:var(--silver-p);margin-bottom:.5rem;">
+                                                        —</div>
+                                                    <div class="pur-date" id="pur-today-date">—</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="pur-result-next" style="display:none;">
+                                            <div class="pur-date" id="pur-date">—</div>
+                                            <div class="pur-raw" id="pur-raw">—</div>
+                                            <div class="pur-about" id="pur-about">—</div>
+                                        </div>
+
+                                        <div id="pur-result-year" style="display:none;">
+                                            <div class="year-section">
+                                                <div class="year-label" id="pur-year-heading">—</div>
+                                                <div class="year-grid" id="pur-year-grid"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="pur-invoke" id="pur-btn" onclick="invokePurnima()"
+                                        style="margin-top:1.5rem; padding: 0.8rem 2rem; font-size: 0.8rem;">
+                                        🌕 Invoke Purnima
+                                    </button>
+                                    <div class="status-chip" id="pur-status"></div>
+                                    <div class="json-wrap">
+                                        <button class="json-toggle" onclick="toggleJson('pur-json')">{ } Raw
+                                            JSON</button>
+                                        <pre class="jraw" id="pur-json"></pre>
+                                    </div>
+                                </div>
+                                <div class="pur-right">
+                                    <div class="pur-days-orb" id="pur-days-orb" style="display:none;">
+                                        <div class="pur-days-num" id="pur-days">—</div>
+                                        <div class="pur-days-lbl">days</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /sections -->
+
+                <!-- SLOKA -->
+                <div class="footer-sloka">
+                    <div class="sloka-orn">
+                        <div class="ln"></div>
+                        <span class="sym">✦</span>
+                        <div class="ln"></div>
+                    </div>
+                    <div class="sloka-text">
+                        "As the moon waxes and wanes through sacred tithis,<br>
+                        so does the soul move through birth and liberation.<br>
+                        In darkness find the light; in the new moon, new beginnings."
+                    </div>
+                    <div class="sloka-deva">ॐ सोमाय नमः · चन्द्रमा मनसो जातः</div>
+                </div>
+
+                <footer>ॐ नमः शिवाय &nbsp;·&nbsp; चंद्र दर्शन &nbsp;·&nbsp; सर्वे भवन्तु सुखिनः</footer>
+
+            </div><!-- .page -->
+
+            <script>
+                /* ══════════════════════════════
+                   CANVAS STAR / COMET SYSTEM
+                ══════════════════════════════ */
+                (() => {
+                    const c = document.getElementById('cosmos');
+                    const ctx = c.getContext('2d');
+                    let W, H, stars = [], comets = [];
+
+                    function resize() {
+                        W = c.width = window.innerWidth;
+                        H = c.height = window.innerHeight;
+                        buildStars();
+                    }
+
+                    function buildStars() {
+                        stars = [];
+                        const n = Math.floor(W * H / 4500);
+                        for (let i = 0; i < n; i++) {
+                            stars.push({
+                                x: Math.random() * W, y: Math.random() * H,
+                                r: Math.random() < .8 ? Math.random() * .9 + .2 : Math.random() * 1.8 + .8,
+                                a: Math.random(), da: (Math.random() * .006 + .002) * (Math.random() < .5 ? 1 : -1),
+                                color: Math.random() < .85 ? '255,255,255'
+                                    : Math.random() < .5 ? '200,180,120' : '180,210,255'
+                            });
+                        }
+                    }
+
+                    function spawnComet() {
+                        const side = Math.floor(Math.random() * 2);
+                        comets.push({
+                            x: side === 0 ? -50 : W + 50, y: Math.random() * H * .6,
+                            vx: side === 0 ? (Math.random() * 3 + 2) : -(Math.random() * 3 + 2),
+                            vy: Math.random() * 1.5 + .5,
+                            len: Math.random() * 140 + 80,
+                            a: 1, life: 1
+                        });
+                    }
+
+                    function draw() {
+                        ctx.clearRect(0, 0, W, H);
+                        // stars
+                        for (const s of stars) {
+                            s.a += s.da;
+                            if (s.a > 1 || s.a < 0) s.da *= -1;
+                            ctx.beginPath();
+                            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(${s.color},${Math.max(0, Math.min(1, s.a))})`;
+                            ctx.fill();
+                        }
+                        // comets
+                        for (let i = comets.length - 1; i >= 0; i--) {
+                            const cm = comets[i];
+                            cm.x += cm.vx; cm.y += cm.vy; cm.life -= .008;
+                            if (cm.life <= 0 || cm.x < -200 || cm.x > W + 200) { comets.splice(i, 1); continue; }
+                            const grad = ctx.createLinearGradient(cm.x, cm.y, cm.x - cm.vx / Math.abs(cm.vx) * cm.len, cm.y - cm.vy / Math.abs(cm.vx) * cm.len * (cm.vy / cm.vx || 1));
+                            grad.addColorStop(0, `rgba(240,200,80,${cm.life * .8})`);
+                            grad.addColorStop(.4, `rgba(200,180,120,${cm.life * .3})`);
+                            grad.addColorStop(1, 'rgba(200,180,120,0)');
+                            ctx.beginPath();
+                            ctx.moveTo(cm.x, cm.y);
+                            ctx.lineTo(cm.x - cm.vx / Math.abs(cm.vx) * cm.len, cm.y - cm.len * .18);
+                            ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
+                        }
+                        requestAnimationFrame(draw);
+                    }
+
+                    window.addEventListener('resize', resize);
+                    resize(); draw();
+                    setInterval(() => { if (Math.random() < .35 && comets.length < 4) spawnComet(); }, 2800);
+                })();
+
+                /* ══ HELPERS ══ */
+                const RENDER = 'https://amavasya-api.onrender.com';
+                const LOCAL = 'http://127.0.0.1:8000';
+                let isLocal = false;
+
+                function getBase() { return document.getElementById('base-url').value.trim().replace(/\/$/, ''); }
+
+                function toggleBase() {
+                    isLocal = !isLocal;
+                    document.getElementById('base-url').value = isLocal ? LOCAL : RENDER;
+                }
+
+                /* DD / MM / YYYY */
+                function fmt(iso) {
+                    if (!iso || !iso.includes('-')) return iso || '—';
+                    const [y, m, d] = iso.split('-');
+                    return `${d} / ${m} / ${y}`;
+                }
+
+                /* status */
+                function status(id, msg, type) {
+                    const el = document.getElementById(id);
+                    el.style.display = 'block';
+                    el.className = 'status-chip sc-' + type;
+                    el.innerHTML = type === 'load' ? `<span class="spinner"></span>${msg}` : msg;
+                }
+                function clearStatus(id) { document.getElementById(id).style.display = 'none'; }
+
+                /* JSON */
+                const jsonStates = {};
+                function toggleJson(id) {
+                    jsonStates[id] = !jsonStates[id];
+                    document.getElementById(id).style.display = jsonStates[id] ? 'block' : 'none';
+                }
+                function setJson(id, data) {
+                    document.getElementById(id).innerHTML = syntaxHL(JSON.stringify(data, null, 2));
+                }
+                function syntaxHL(s) {
+                    return s.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+                        if (/^"/.test(m)) { if (/:$/.test(m)) return `<span class="jk">${m}</span>`; return `<span class="js">${m}</span>`; }
+                        if (/true|false|null/.test(m)) return `<span class="jn">${m}</span>`;
+                        return `<span class="jv">${m}</span>`;
+                    });
+                }
+
+                async function apiFetch(path) {
+                    const res = await fetch(getBase() + path, { headers: { Accept: 'application/json' } });
+                    if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+                    return res.json();
+                }
+
+                /* ══ SANKASHTI ══ */
+                let sankEp = 'next';
+                function selectSankEp(ep) {
+                    sankEp = ep;
+                    document.querySelectorAll('#sank-ep-today, #sank-ep-next, #sank-ep-year').forEach(b => b.classList.remove('active'));
+                    document.getElementById('sank-ep-' + ep).classList.add('active');
+                    document.getElementById('sank-year-param').classList.toggle('show', ep === 'year');
+                }
+
+                async function invokeSankashti() {
+                    const btn = document.getElementById('sank-btn');
+                    btn.disabled = true; btn.textContent = '⟳ Invoking…';
+                    status('sank-status', "Reaching Ganesha's realm…", 'load');
+                    ['sank-result-today', 'sank-result-next', 'sank-result-year'].forEach(id => document.getElementById(id).style.display = 'none');
+                    document.getElementById('sank-content-idle').style.display = 'none';
+
+                    try {
+                        let path = '/sankashti/';
+                        if (sankEp === 'today') path += 'today';
+                        else if (sankEp === 'next') path += 'next';
+                        else {
+                            const y = document.getElementById('sank-year-in').value.trim();
+                            if (!y) { status('sank-status', '✗ Enter a year', 'err'); btn.disabled = false; btn.innerHTML = '🌛 &nbsp;Invoke Sankashti'; return; }
+                            path += 'year/' + y;
+                        }
+                        const d = await apiFetch(path);
+                        renderSankashti(d, sankEp);
+                        status('sank-status', '✦ Sankashti data received — HTTP 200 OK', 'ok');
+                        setJson('sank-json', d);
+                    } catch (e) {
+                        status('sank-status', '✗ ' + e.message, 'err');
+                        document.getElementById('sank-content-idle').style.display = 'block';
+                    } finally {
+                        btn.disabled = false; btn.innerHTML = '🌛 &nbsp;Invoke Sankashti';
+                    }
+                }
+
+                function renderSankashti(d, ep) {
+                    document.getElementById('sank-results-container').style.display = 'block';
+                    if (ep === 'today') {
+                        document.getElementById('sank-result-today').style.display = 'block';
+                        const isS = d.is_sankashti === true;
+                        const st = document.getElementById('sank-today-status');
+                        st.textContent = isS ? '🕉 Today is Sankashti Chaturthi' : 'Today is not Sankashti Chaturthi';
+                        st.style.color = isS ? 'var(--saffron)' : 'var(--silver-p)';
+                        document.getElementById('sank-today-date').textContent = fmt(d.date);
+                    } else if (ep === 'next') {
+                        document.getElementById('sank-result-next').style.display = 'block';
+                        document.getElementById('sank-date').textContent = fmt(d.date);
+                        document.getElementById('sank-raw').textContent = d.date || '';
+                        document.getElementById('sank-days').textContent = d.days_until ?? '—';
+                        document.getElementById('sank-about').textContent = d.about || '—';
+                    } else {
+                        document.getElementById('sank-result-year').style.display = 'block';
+                        document.getElementById('sank-year-heading').textContent = `${d.total || 0} Sankashtis in ${d.year || ''}`;
+                        const grid = document.getElementById('sank-year-grid');
+                        grid.innerHTML = '';
+                        (d.dates || []).forEach((item, i) => {
+                            const c = document.createElement('div'); c.className = 'year-card';
+                            c.style.color = 'var(--saffron)';
+                            c.innerHTML = `<span class="am-yc-idx">${String(i + 1).padStart(2, '0')}</span>
+                        <span class="am-yc-moon">🌛</span>
+                        <div class="am-yc-date">${fmt(item.date || item)}</div>
+                        <div class="am-yc-raw">${item.date || item}</div>
+                        <div class="am-yc-about">${item.about || 'Sankashti Chaturthi'}</div>`;
+                            grid.appendChild(c);
+                        });
+                    }
+                }
+
+                /* ══ AMAVASYA ══ */
+                let amEp = 'next';
+                function selectAmEp(ep) {
+                    amEp = ep;
+                    document.querySelectorAll('#am-ep-today, #am-ep-next, #am-ep-year').forEach(b => b.classList.remove('active'));
+                    document.getElementById('am-ep-' + ep).classList.add('active');
+                    document.getElementById('am-year-param').classList.toggle('show', ep === 'year');
+                }
+
+                async function invokeAmavasya() {
+                    const btn = document.getElementById('am-btn');
+                    btn.disabled = true; btn.textContent = '⟳ Invoking…';
+                    status('am-status', 'Crossing the cosmic void…', 'load');
+                    ['am-result-today', 'am-result-next', 'am-result-year'].forEach(id => document.getElementById(id).style.display = 'none');
+                    document.getElementById('am-content-idle').style.display = 'none';
+                    try {
+                        let path = '/amavasya/';
+                        if (amEp === 'today') path += 'today';
+                        else if (amEp === 'next') path += 'next';
+                        else {
+                            const y = document.getElementById('am-year-in').value.trim();
+                            if (!y) { status('am-status', '✗ Enter a year', 'err'); btn.disabled = false; btn.innerHTML = '🌑 &nbsp;Invoke Oracle'; return; }
+                            path += 'year/' + y;
+                        }
+                        const d = await apiFetch(path);
+                        renderAmavasya(d, amEp);
+                        status('am-status', '✦ Amavasya data received — HTTP 200 OK', 'ok');
+                        setJson('am-json', d);
+                    } catch (e) {
+                        status('am-status', '✗ ' + e.message, 'err');
+                        document.getElementById('am-content-idle').style.display = 'block';
+                    } finally {
+                        btn.disabled = false; btn.innerHTML = '🌑 &nbsp;Invoke Oracle';
+                    }
+                }
+
+                function renderAmavasya(d, ep) {
+                    document.getElementById('am-results-container').style.display = 'block';
+                    if (ep === 'today') {
+                        document.getElementById('am-result-today').style.display = 'block';
+                        const isAm = d.is_amavasya === true;
+                        document.getElementById('am-today-emoji').textContent = isAm ? '🌑' : '🌘';
+                        const st = document.getElementById('am-today-status');
+                        st.textContent = isAm ? '🪔 Today is Amavasya' : 'Today is not Amavasya';
+                        st.style.color = isAm ? 'var(--gold-b)' : 'var(--silver-p)';
+                        document.getElementById('am-today-date').textContent = fmt(d.date);
+                    } else if (ep === 'next') {
+                        document.getElementById('am-result-next').style.display = 'block';
+                        document.getElementById('am-next-date').textContent = fmt(d.date);
+                        document.getElementById('am-next-raw').textContent = d.date || '';
+                        document.getElementById('am-next-days').textContent = d.days_until ?? '—';
+                        document.getElementById('am-next-about').textContent = d.about || '—';
+                    } else {
+                        document.getElementById('am-result-year').style.display = 'block';
+                        document.getElementById('am-year-heading').textContent = `${d.total || 0} Amavasyas in ${d.year || ''}`;
+                        const grid = document.getElementById('am-year-grid');
+                        grid.innerHTML = '';
+                        (d.dates || []).forEach((item, i) => {
+                            const c = document.createElement('div'); c.className = 'year-card';
+                            c.style.color = 'var(--gold)';
+                            c.innerHTML = `<span class="am-yc-idx">${String(i + 1).padStart(2, '0')}</span>
+                        <span class="am-yc-moon">🌑</span>
+                        <div class="am-yc-date">${fmt(item.date || item)}</div>
+                        <div class="am-yc-raw">${item.date || item}</div>
+                        <div class="am-yc-about">${item.about || 'Amavasya'}</div>`;
+                            grid.appendChild(c);
+                        });
+                    }
+                }
+
+                /* ══ PURNIMA ══ */
+                let purEp = 'next';
+                function selectPurEp(ep) {
+                    purEp = ep;
+                    document.querySelectorAll('#pur-ep-today, #pur-ep-next, #pur-ep-year').forEach(b => b.classList.remove('active'));
+                    document.getElementById('pur-ep-' + ep).classList.add('active');
+                    document.getElementById('pur-year-param').classList.toggle('show', ep === 'year');
+                }
+
+                async function invokePurnima() {
+                    const btn = document.getElementById('pur-btn');
+                    btn.disabled = true; btn.textContent = '⟳ Invoking…';
+                    status('pur-status', "Seeking the full moon's light…", 'load');
+                    ['pur-result-today', 'pur-result-next', 'pur-result-year'].forEach(id => document.getElementById(id).style.display = 'none');
+                    document.getElementById('pur-idle').style.display = 'none';
+                    try {
+                        let path = '/purnima/';
+                        if (purEp === 'today') path += 'today';
+                        else if (purEp === 'next') path += 'next';
+                        else {
+                            const y = document.getElementById('pur-year-in').value.trim();
+                            if (!y) { status('pur-status', '✗ Enter a year', 'err'); btn.disabled = false; btn.innerHTML = '🌕 Invoke Purnima'; return; }
+                            path += 'year/' + y;
+                        }
+                        const d = await apiFetch(path);
+                        renderPurnima(d, purEp);
+                        status('pur-status', '✦ Purnima data received — HTTP 200 OK', 'ok');
+                        setJson('pur-json', d);
+                    } catch (e) {
+                        status('pur-status', '✗ ' + e.message, 'err');
+                        document.getElementById('pur-idle').style.display = 'block';
+                    } finally {
+                        btn.disabled = false; btn.innerHTML = '🌕 Invoke Purnima';
+                    }
+                }
+
+                function renderPurnima(d, ep) {
+                    document.getElementById('pur-results-container').style.display = 'block';
+                    if (ep === 'today') {
+                        document.getElementById('pur-result-today').style.display = 'block';
+                        const isP = d.is_purnima === true;
+                        const st = document.getElementById('pur-today-status');
+                        st.textContent = isP ? '🌕 Today is Purnima' : 'Today is not Purnima';
+                        st.style.color = isP ? 'var(--silver-p)' : 'rgba(255,255,255,.5)';
+                        document.getElementById('pur-today-date').textContent = fmt(d.date);
+                    } else if (ep === 'next') {
+                        document.getElementById('pur-result-next').style.display = 'block';
+                        document.getElementById('pur-date').textContent = fmt(d.date);
+                        document.getElementById('pur-raw').textContent = d.date || '';
+                        document.getElementById('pur-about').textContent = d.about || '—';
+                        const orb = document.getElementById('pur-days-orb');
+                        if (d.days_until != null) {
+                            document.getElementById('pur-days').textContent = d.days_until;
+                            orb.style.display = 'flex';
+                        } else orb.style.display = 'none';
+                    } else {
+                        document.getElementById('pur-result-year').style.display = 'block';
+                        document.getElementById('pur-year-heading').textContent = `${d.total || 0} Purnimas in ${d.year || ''}`;
+                        const grid = document.getElementById('pur-year-grid');
+                        grid.innerHTML = '';
+                        (d.dates || []).forEach((item, i) => {
+                            const c = document.createElement('div'); c.className = 'year-card';
+                            c.style.color = 'var(--silver)';
+                            c.innerHTML = `<span class="am-yc-idx">${String(i + 1).padStart(2, '0')}</span>
+                        <span class="am-yc-moon">🌕</span>
+                        <div class="am-yc-date">${fmt(item.date || item)}</div>
+                        <div class="am-yc-raw">${item.date || item}</div>
+                        <div class="am-yc-about">${item.about || 'Purnima'}</div>`;
+                            grid.appendChild(c);
+                        });
+                    }
+                }
+                /* ══ RESET / BACK LOGIC ══ */
+                function resetSank() {
+                    document.getElementById('sank-results-container').style.display = 'none';
+                    document.getElementById('sank-content-idle').style.display = 'block';
+                    clearStatus('sank-status');
+                }
+                function resetAm() {
+                    document.getElementById('am-results-container').style.display = 'none';
+                    document.getElementById('am-content-idle').style.display = 'block';
+                    clearStatus('am-status');
+                }
+                function resetPur() {
+                    document.getElementById('pur-results-container').style.display = 'none';
+                    document.getElementById('pur-idle').style.display = 'block';
+                    clearStatus('pur-status');
+                }
+            </script>
+</body>
+
+</html>
