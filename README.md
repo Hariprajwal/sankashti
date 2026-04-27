@@ -2,7 +2,7 @@
 
 A public API that calculates **Sankashti Chaturthi** and **Purnima (Full Moon)** dates using astronomical calculations based on the **Hindu lunar calendar (Panchang)**.
 
-This project uses **Sun–Moon angular mathematics (Tithi calculation)** to determine lunar events instead of hardcoding calendar dates..
+This project uses **Sun–Moon angular mathematics (Tithi calculation)** to determine lunar events instead of hardcoding calendar dates.
 
 The API provides endpoints to:
 
